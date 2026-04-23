@@ -15,11 +15,11 @@ if [[ -f "$ROOT/package.json" ]]; then
   ECOSYSTEM="node"
 elif [[ -f "$ROOT/pyproject.toml" ]]; then
   VERSION_FILE="pyproject.toml"
-  CURRENT_VERSION=$(grep -E '^version[[:space:]]*=' "$ROOT/pyproject.toml" | head -1 | sed 's/.*=[[:space:]]*//' | tr -d '"'"'"')
+  CURRENT_VERSION=$(grep -E '^version[[:space:]]*=' "$ROOT/pyproject.toml" | head -1 | sed 's/.*=[[:space:]]*//' | tr -d "\"'")
   ECOSYSTEM="python"
 elif [[ -f "$ROOT/Cargo.toml" ]]; then
   VERSION_FILE="Cargo.toml"
-  CURRENT_VERSION=$(grep -E '^version[[:space:]]*=' "$ROOT/Cargo.toml" | head -1 | sed 's/.*=[[:space:]]*//' | tr -d '"'"'"')
+  CURRENT_VERSION=$(grep -E '^version[[:space:]]*=' "$ROOT/Cargo.toml" | head -1 | sed 's/.*=[[:space:]]*//' | tr -d "\"'")
   ECOSYSTEM="rust"
 elif [[ -f "$ROOT/VERSION" ]]; then
   VERSION_FILE="VERSION"

@@ -16,9 +16,10 @@ if [[ ! -f "$CHANGELOG" ]]; then
   printf "# Changelog\n\n%s\n" "$ENTRY" > "$CHANGELOG"
   echo "CREATED=$CHANGELOG"
 else
-  awk -v entry="$ENTRY" '
+  # awk -v는 멀티라인 문자열을 처리 못함 → 환경변수 + ENVIRON 사용
+  ENTRY="$ENTRY" awk '
     /^## / && !inserted {
-      print entry
+      print ENVIRON["ENTRY"]
       print ""
       inserted=1
     }
