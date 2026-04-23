@@ -3,7 +3,7 @@
 When the user says "릴리스해줘", "release", or asks to ship/version-bump:
 
 ## Step 1: Detect project structure
-Run: `bash scripts/detect.sh .`
+Run: `bash .release-docs/scripts/detect.sh .`
 This outputs key=value pairs: VERSION_FILE, CURRENT_VERSION, ECOSYSTEM, RELEASE_SCRIPT, CHANGELOG, DOCS_DIR
 
 ## Step 2: If RELEASE_SCRIPT is set, read it
@@ -25,10 +25,10 @@ Report the decision, don't ask for confirmation.
 - Match existing CHANGELOG format if one exists
 
 ## Step 6: Insert CHANGELOG
-Run: `echo "<generated text>" | bash scripts/changelog-insert.sh <CHANGELOG_PATH>`
+Run: `echo "<generated text>" | bash .release-docs/scripts/changelog-insert.sh <CHANGELOG_PATH>`
 
 ## Step 7: Release
-Run: `bash scripts/release.sh <bump_type> .`
+Run: `bash .release-docs/scripts/release.sh <bump_type> .`
 This auto-delegates to the project's own release script if one exists.
 
 ## Rules

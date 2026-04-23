@@ -18,16 +18,50 @@
 | Codex (OpenAI) | `AGENTS.md` | 저장소 클론 후 참조 |
 | Gemini CLI | `GEMINI.md` | 저장소 클론 후 참조 |
 
-## Claude Code 설치
+## 설치
 
-```
-/plugin marketplace add <저장소-URL>
+### Claude Code
+
+```bash
+/plugin marketplace add https://github.com/wis-graph/release-docs-skill.git
 /plugin install release-docs
 ```
 
 설치 직후부터 동작:
 - **UserPromptSubmit 훅** — "릴리스해줘" 키워드 감지 시 `detect.sh` 자동 실행
 - **release-docs 스킬** — LLM이 세션 컨텍스트에서 CHANGELOG 생성 후 스크립트 호출
+
+### Codex (OpenAI)
+
+```bash
+# 프로젝트 루트에 클론
+git clone https://github.com/wis-graph/release-docs-skill.git .release-docs
+
+# AGENTS.md를 프로젝트 루트에 복사 (또는 심볼릭 링크)
+cp .release-docs/AGENTS.md ./AGENTS.md
+```
+
+Codex가 `AGENTS.md`를 자동으로 읽고 스크립트 경로(`.release-docs/scripts/`)를 참조합니다.
+
+### Gemini CLI
+
+```bash
+# 프로젝트 루트에 클론
+git clone https://github.com/wis-graph/release-docs-skill.git .release-docs
+
+# GEMINI.md를 프로젝트 루트에 복사 (또는 심볼릭 링크)
+cp .release-docs/GEMINI.md ./GEMINI.md
+```
+
+Gemini가 `GEMINI.md`를 자동으로 읽고 스크립트를 참조합니다.
+
+### 기타 AI 코딩 도구 (Cursor, Windsurf 등)
+
+```bash
+git clone https://github.com/wis-graph/release-docs-skill.git .release-docs
+```
+
+해당 도구의 규칙 파일(`.cursorrules`, `.windsurfrules` 등)에 `skills/release-docs/SKILL.md` 내용을 붙여넣거나, 스크립트를 직접 호출하도록 안내합니다.
 
 ## 사용
 
