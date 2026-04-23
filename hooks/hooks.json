@@ -1,0 +1,18 @@
+{
+  "description": "릴리스 키워드 감지 시 프로젝트 구조를 자동 스캔하여 컨텍스트에 주입. LLM은 CHANGELOG 텍스트만 생성하면 됨.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "릴리스|release|Release",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/detect.sh\" .",
+            "timeout": 5,
+            "statusMessage": "프로젝트 구조 감지 중..."
+          }
+        ]
+      }
+    ]
+  }
+}

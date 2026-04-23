@@ -1,6 +1,6 @@
 # release-docs
 
-"릴리스해줘" 한 마디로 CHANGELOG + 버전 + 문서 + 릴리스를 자동화하는 Claude Code 플러그인.
+"릴리스해줘" 한 마디로 CHANGELOG + 버전 + 문서 + 릴리스를 자동화하는 AI 코딩 도구 플러그인.
 
 ## 특징
 
@@ -8,36 +8,47 @@
 - **프로젝트 자동 감지** — 설정 파일 없이 버전 파일, 릴리스 스크립트, CHANGELOG, 문서 디렉터리를 자동 탐지
 - **스크립트 없는 프로젝트도 지원** — 릴리스 인프라가 없으면 직접 커밋+태그+푸시 수행
 - **이중 커밋 방지** — 기존 릴리스 스크립트가 있으면 읽고 중복 동작 제거
+- **토큰 절약** — 기계적 작업은 스크립트가 처리, LLM은 CHANGELOG 텍스트 생성만
 
-## 설치
+## 지원 플랫폼
+
+| 플랫폼 | 인식 파일 | 설치 방법 |
+|--------|----------|----------|
+| Claude Code | `.claude-plugin/` | `/plugin install release-docs` |
+| Codex (OpenAI) | `AGENTS.md` | 저장소 클론 후 참조 |
+| Gemini CLI | `GEMINI.md` | 저장소 클론 후 참조 |
+
+## Claude Code 설치
 
 ```
 /plugin marketplace add <저장소-URL>
 /plugin install release-docs
 ```
 
-## 사용
+설치 직후부터 동작:
+- **UserPromptSubmit 훅** — "릴리스해줘" 키워드 감지 시 `detect.sh` 자동 실행
+- **release-docs 스킬** — LLM이 세션 컨텍스트에서 CHANGELOG 생성 후 스크립트 호출
 
-세션 끝에 한 마디:
+## 사용
 
 ```
 릴리스해줘
 ```
 
-또는:
+자동으로:
+1. `detect.sh` — 프로젝트 구조 감지 (훅이 자동 실행)
+2. LLM — 세션 컨텍스트에서 변경 분류 + 버전 결정 + CHANGELOG 텍스트 생성
+3. `changelog-insert.sh` — CHANGELOG에 항목 삽입
+4. `release.sh` — 버전 범프 + 빌드 + 커밋 + 태그 + 푸시
 
-```
-/release-docs
-```
+## 스크립트
 
-스킬이 자동으로:
-
-1. 프로젝트 구조 감지 (package.json, pyproject.toml, Cargo.toml 등)
-2. 세션에서 한 작업을 분류 (새 기능 / 버그 수정 / 개선 / 내부)
-3. 버전 범프 결정 (breaking→major, feature→minor, fix→patch)
-4. CHANGELOG 항목 작성 (사용자 관점, 기존 포맷 준수)
-5. 기능 문서 업데이트 (필요 시)
-6. 릴리스 실행 (빌드→커밋→태그→푸시)
+| 스크립트 | 역할 |
+|---------|------|
+| `scripts/detect.sh` | 프로젝트 구조 감지 → key=value 출력 |
+| `scripts/bump-version.sh` | 버전 파일 수정 (모든 에코시스템) |
+| `scripts/changelog-insert.sh` | CHANGELOG에 항목 삽입 |
+| `scripts/release.sh` | 오케스트레이터 — 자체 스크립트 있으면 위임, 없으면 직접 수행 |
 
 ## 지원 에코시스템
 
@@ -48,6 +59,25 @@
 | `Cargo.toml` | Rust |
 | `build.gradle` | JVM |
 | `VERSION` | 범용 |
+
+## 구조
+
+```
+release-docs-plugin/
+├── .claude-plugin/        ← Claude Code 플러그인 매니페스트
+├── skills/release-docs/
+│   └── SKILL.md           ← LLM 워크플로우 (CHANGELOG 생성 중심)
+├── scripts/
+│   ├── detect.sh          ← 프로젝트 감지
+│   ├── bump-version.sh    ← 버전 범프
+│   ├── changelog-insert.sh ← CHANGELOG 삽입
+│   └── release.sh         ← 릴리스 오케스트레이터
+├── hooks/
+│   └── hooks.json         ← 키워드 감지 훅
+├── AGENTS.md              ← Codex/OpenAI 지원
+├── GEMINI.md              ← Gemini CLI 지원
+└── README.md
+```
 
 ## License
 
