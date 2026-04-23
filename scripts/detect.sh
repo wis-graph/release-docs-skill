@@ -59,6 +59,26 @@ for d in docs/guide docs wiki; do
   fi
 done
 
+# --- git 태그 fallback ---
+# 버전 파일이 없어도 git 태그에서 현재 버전을 추론할 수 있음
+LATEST_TAG=""
+if [[ -d "$ROOT/.git" ]] || git -C "$ROOT" rev-parse --git-dir >/dev/null 2>&1; then
+  LATEST_TAG=$(git -C "$ROOT" describe --tags --abbrev=0 2>/dev/null || true)
+fi
+
+# 버전 파일이 없지만 git 태그가 있으면 거기서 버전 추출
+if [[ -z "$CURRENT_VERSION" && -n "$LATEST_TAG" ]]; then
+  CURRENT_VERSION="${LATEST_TAG#v}"
+fi
+
+# --- 릴리스 준비도 ---
+# 버전 파일, 릴리스 스크립트, 이전 태그 중 하나라도 있으면 "준비됨"으로 간주.
+# 셋 다 없으면 의도치 않은 릴리스를 막기 위해 RELEASE_READY=false
+RELEASE_READY="false"
+if [[ -n "$VERSION_FILE" || -n "$RELEASE_SCRIPT" || -n "$LATEST_TAG" ]]; then
+  RELEASE_READY="true"
+fi
+
 # --- 출력 ---
 cat <<DETECT
 VERSION_FILE=$VERSION_FILE
@@ -67,4 +87,6 @@ ECOSYSTEM=$ECOSYSTEM
 RELEASE_SCRIPT=$RELEASE_SCRIPT
 CHANGELOG=$CHANGELOG
 DOCS_DIR=$DOCS_DIR
+LATEST_TAG=$LATEST_TAG
+RELEASE_READY=$RELEASE_READY
 DETECT

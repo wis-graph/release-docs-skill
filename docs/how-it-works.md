@@ -72,18 +72,22 @@ release-docs는 이 둘을 분리한다. LLM은 CHANGELOG 텍스트 생성만 �
 
 ### 2. 감지 스크립트 (`scripts/detect.sh`)
 
-프로젝트 루트를 스캔하여 6가지 정보를 key=value로 출력한다:
+프로젝트 루트를 스캔하여 8가지 정보를 key=value로 출력한다:
 
 ```bash
 $ bash scripts/detect.sh /path/to/project
 
-VERSION_FILE=pyproject.toml      # 버전이 기록된 파일
-CURRENT_VERSION=1.2.3            # 현재 버전
+VERSION_FILE=pyproject.toml      # 버전이 기록된 파일 (없으면 빈값)
+CURRENT_VERSION=1.2.3            # 현재 버전 (버전 파일 없으면 git 태그에서 추론)
 ECOSYSTEM=python                 # 에코시스템 (node/python/rust/generic)
 RELEASE_SCRIPT=                  # 프로젝트 자체 릴리스 스크립트 (없으면 빈값)
-CHANGELOG=CHANGELOG.md           # CHANGELOG 파일 위치
+CHANGELOG=CHANGELOG.md           # CHANGELOG 파일 위치 (없으면 빈값)
 DOCS_DIR=                        # 기능 문서 디렉터리 (없으면 빈값)
+LATEST_TAG=v1.2.3                # 최신 git 태그 (없으면 빈값)
+RELEASE_READY=true               # VERSION_FILE/RELEASE_SCRIPT/LATEST_TAG 중 하나라도 있으면 true
 ```
+
+`RELEASE_READY=false`는 "릴리스 인프라가 하나도 없는 프로젝트"를 의미한다. 이 경우 `release.sh`는 의도치 않은 빈 릴리스를 막기 위해 자동 진행을 중단한다 (아래 "릴리스 준비도 게이트" 참조).
 
 **감지 우선순위:**
 
@@ -158,7 +162,49 @@ detect.sh → RELEASE_SCRIPT=scripts/release.js 발견
 3. git add -A
 4. git commit -m "chore: release v1.3.0"
 5. git tag v1.3.0
-6. git push && git push --tags
+6. git push && git push --tags  → (원격 저장소가 있으면)
+```
+
+## 릴리스 준비도 게이트 (중요)
+
+버전 파일도, 릴리스 스크립트도, 이전 태그도 없는 "맨땅" 프로젝트에서 자동 릴리스를 돌리면 원격에 의도치 않은 빈 릴리스가 올라간다. 이걸 막기 위해 `release.sh`는 **준비도 게이트**를 둔다.
+
+```
+detect.sh 출력:
+  VERSION_FILE=, RELEASE_SCRIPT=, LATEST_TAG=  → RELEASE_READY=false
+        │
+        ▼
+release.sh (플래그 없이 실행):
+  exit 2 — "릴리스 준비 안 됨" 메시지 + 안내 출력
+        │
+        ▼
+LLM이 사용자에게 확인:
+  "릴리스 인프라가 없어 자동 진행을 멈췄습니다.
+   1) 첫 릴리스로 진행 (v0.1.0 생성)
+   2) 취소 — 먼저 세팅할게요"
+        │
+        ├──── 1 선택 ────▶ release.sh $BUMP . --first-release
+        │                    - VERSION 파일 0.1.0 생성
+        │                    - bump-version.sh로 범프
+        │                    - changelog-insert.sh가 CHANGELOG.md 생성
+        │                    - git commit + tag + (원격 있으면) push
+        │
+        └──── 2 선택 ────▶ 중단 (사용자가 직접 세팅)
+```
+
+**핵심:** "릴리스 인프라가 없음"은 자동 진행의 신호가 아니라 **사용자 확인이 필요한 신호**다. 한 번 세팅된 후(태그든 버전 파일이든 생기면)부터는 `RELEASE_READY=true`가 되어 평소처럼 자동 진행된다.
+
+### 준비된 프로젝트 (`RELEASE_READY=true`)
+
+버전 파일 OR 릴리스 스크립트 OR 이전 태그 중 하나라도 있으면 "준비됨"으로 간주. 평소처럼 `release.sh <bump>`만 호출하면 끝:
+
+```
+1. bump-version.sh  → 버전 파일 수정 (있을 때만)
+2. npm run build    → (빌드 스크립트가 있으면)
+3. git add -A
+4. git commit -m "chore: release vX.Y.Z"
+5. git tag vX.Y.Z
+6. git push && git push --tags  → (원격 저장소가 있으면)
 ```
 
 ---
@@ -197,13 +243,21 @@ CHANGELOG가 이미 있으면 그 포맷을 따른다:
 
 ## 플랫폼별 동작 차이
 
-### Claude Code
+### Claude Code (프로젝트 로컬 — 권장)
 
 ```
-훅 자동 감지 → 스킬 로드 → 스크립트 호출
+.claude/settings.json의 훅 정의 → detect.sh 자동 실행 → 스킬 로드 → 스크립트 호출
 ```
 
-가장 완전한 경험. 훅이 키워드를 감지하고, 스킬이 LLM 워크플로우를 안내하고, 스크립트가 실행한다.
+프로젝트 루트에 클론된 `.release-docs/`를 `$CLAUDE_PROJECT_DIR` 기준으로 참조한다. 해당 프로젝트에서만 훅이 작동하고 다른 프로젝트는 영향받지 않는다.
+
+### Claude Code (글로벌 마켓플레이스)
+
+```
+플러그인 훅 자동 감지 → 스킬 로드 → ${CLAUDE_PLUGIN_ROOT}/scripts 호출
+```
+
+모든 프로젝트에서 훅이 활성화된다. 개인용으로 쓰기 편하지만 팀원과 공유하기는 어렵다.
 
 ### Codex / Gemini CLI
 
