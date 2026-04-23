@@ -1,0 +1,16 @@
+{
+  "name": "release-docs",
+  "version": "0.1.0",
+  "description": "LLM 세션 컨텍스트 기반 릴리스 자동화 — CHANGELOG 작성, 버전 범프, 기능 문서 업데이트, 릴리스 실행을 한 번에. 스크립트 없는 프로젝트에서도 동작.",
+  "author": {
+    "name": "wis",
+    "email": "kogoome@gmail.com"
+  },
+  "keywords": [
+    "release",
+    "changelog",
+    "versioning",
+    "documentation",
+    "automation"
+  ]
+}
