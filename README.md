@@ -63,6 +63,10 @@ git clone https://github.com/wis-graph/release-docs-skill.git .release-docs
 
 해당 도구의 규칙 파일(`.cursorrules`, `.windsurfrules` 등)에 `skills/release-docs/SKILL.md` 내용을 붙여넣거나, 스크립트를 직접 호출하도록 안내합니다.
 
+## 동작 원리
+
+자세한 아키텍처와 흐름은 **[docs/how-it-works.md](docs/how-it-works.md)** 참조.
+
 ## 사용
 
 ```
