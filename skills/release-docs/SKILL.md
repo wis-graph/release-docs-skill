@@ -1,15 +1,21 @@
 ---
 name: release-docs
-description: Use when the user says "릴리스해줘", "release", or asks to version-bump, write changelog, and ship — handles the full release cycle from session context
+description: Use when the user says any of "릴리스해줘", "변경사항", "변경기록", "release", "changelog", or asks to write changelog / version-bump / ship. Handles the full cycle from session context. Works for users who deploy (full release) and for users who only want a local changelog + version tag without deploying.
 ---
 
 # Release Docs
 
-LLM 세션 컨텍스트 기반 릴리스 자동화.
+LLM 세션 컨텍스트 기반 CHANGELOG·버전·릴리스 자동화.
+
+**두 가지 사용 모드를 같은 플로우로 커버한다:**
+- **릴리스 모드** — 버전 범프 + CHANGELOG + 빌드 + 커밋 + 태그 + 푸시까지 (기존 동작)
+- **변경 기록 모드** — 배포 없이도 로컬 CHANGELOG 엔트리 + 로컬 버전 태그까지 (원격 없으면 push 자동 스킵)
+
+트리거 단어가 다를 뿐 내부 동작은 동일하다. 사용자가 `릴리스`를 쳤든 `변경사항`을 쳤든 LLM은 같은 워크플로우를 돈다.
 
 ## 전제
 
-플러그인 설치 시 `scripts/` 에 감지·범프·삽입·릴리스 스크립트가 포함된다. UserPromptSubmit 훅이 "릴리스" 키워드를 감지하면 `detect.sh`가 자동 실행되어 프로젝트 정보가 컨텍스트에 주입된다.
+플러그인 설치 시 `scripts/` 에 감지·범프·삽입·릴리스 스크립트가 포함된다. UserPromptSubmit 훅이 트리거 키워드(`릴리스`, `변경사항`, `변경기록`, `release`, `changelog`)를 감지하면 `detect.sh`가 자동 실행되어 프로젝트 정보가 컨텍스트에 주입된다.
 
 **스크립트 경로 결정:**
 - Claude Code **글로벌 설치**: `${CLAUDE_PLUGIN_ROOT}/scripts/`
@@ -151,6 +157,17 @@ bash "$SCRIPTS_DIR/release.sh" "$BUMP_TYPE" . --first-release
 - CHANGELOG 없으면 `changelog-insert.sh`가 `CHANGELOG.md`를 생성
 - git 원격 없으면 푸시 건너뛰고 로컬 커밋/태그만 생성 (원격에 빈 릴리스 안 올라감)
 
+## 트리거 단어에 따른 톤 (내부 동작은 동일)
+
+사용자가 친 트리거 단어에 따라 보고 메시지의 어휘만 살짝 바꾼다. 실제로 수행하는 단계는 동일하다.
+
+| 트리거 | 사용자 의도 | 보고 톤 |
+|--------|------------|---------|
+| `릴리스` / `release` / `Release` | 버전 올리고 배포까지 | "릴리스 완료 — v0.1.2" |
+| `변경사항` / `변경기록` / `changelog` | 일단 기록만 (+ 로컬 버전 태그) | "변경 기록 완료 — v0.1.2 (로컬)" 또는 원격 있으면 "v0.1.2 (푸시 완료)" |
+
+원격이 없거나 `RELEASE_READY=false`인 프로젝트에서는 어느 트리거든 상관없이 **로컬 커밋·태그까지만** 수행되고 push는 자동 스킵된다. 이는 `release.sh`의 기본 동작이므로 트리거 단어에 따른 분기 코드는 필요 없다.
+
 ## Red Flags
 
 - "버전을 몇으로 올릴까요?" → **묻지 말고 결정하라** (`RELEASE_READY=false`의 첫 릴리스 확인은 예외)
@@ -160,3 +177,5 @@ bash "$SCRIPTS_DIR/release.sh" "$BUMP_TYPE" . --first-release
 - "커밋 메시지 기반으로 CHANGELOG 작성" → **세션 컨텍스트를 사용**
 - detect 결과의 RELEASE_SCRIPT를 읽지 않았다 → **반드시 읽고 이중 작업 방지**
 - DOCS_DIR이 있는데 확인 안 했다 → **기능 문서 확인 건너뛰지 마라**
+- 사용자가 `변경사항`을 쳤는데 "릴리스 완료!"로 보고 → **트리거 단어에 맞춰 "변경 기록 완료"로 표현**
+- 원격이 없는데 "푸시 완료"로 보고 → **"로컬 커밋·태그 완료 (원격 없음)"로 정확히 표현**

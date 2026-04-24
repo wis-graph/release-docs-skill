@@ -1,9 +1,9 @@
 {
-  "description": "릴리스 키워드 감지 시 프로젝트 구조를 자동 스캔하여 컨텍스트에 주입. LLM은 CHANGELOG 텍스트만 생성하면 됨.",
+  "description": "릴리스/변경사항/변경기록 키워드 감지 시 프로젝트 구조를 자동 스캔하여 컨텍스트에 주입. 릴리스 여부와 무관하게 CHANGELOG 기록만 원하는 사용자도 같은 플로우 사용 가능.",
   "hooks": {
     "UserPromptSubmit": [
       {
-        "matcher": "릴리스|release|Release",
+        "matcher": "릴리스|변경사항|변경기록|release|Release|changelog|Changelog",
         "hooks": [
           {
             "type": "command",

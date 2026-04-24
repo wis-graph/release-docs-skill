@@ -1,6 +1,12 @@
 # Release Docs — Agent Instructions
 
-When the user says "릴리스해줘", "release", or asks to ship/version-bump:
+When the user says any of "릴리스해줘", "변경사항", "변경기록", "release", "changelog", or asks to ship / version-bump / record changes:
+
+The workflow is identical regardless of which trigger word was used. Trigger words only affect the wording of the final report:
+- `릴리스` / `release` → "Released v0.1.2"
+- `변경사항` / `변경기록` / `changelog` → "Changelog recorded — v0.1.2 (local)" (or "(pushed)" if a remote exists)
+
+If the project has no git remote, skip push automatically — commit and tag only.
 
 ## Step 1: Detect project structure
 Run: `bash .release-docs/scripts/detect.sh .`

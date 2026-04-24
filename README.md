@@ -1,12 +1,14 @@
 # release-docs
 
-"릴리스해줘" 한 마디로 CHANGELOG + 버전 + 문서 + 릴리스를 자동화하는 AI 코딩 도구 플러그인.
+"**릴리스**" / "**변경사항**" / "**변경기록**" 한 마디로 CHANGELOG + 버전 + 문서 + (선택) 릴리스를 자동화하는 AI 코딩 도구 플러그인.
 
 ## 특징
 
+- **두 가지 사용 모드, 하나의 플로우** — 실제로 배포까지 하는 사람은 "릴리스", 배포 없이 로컬 CHANGELOG + 버전 태그만 쓰는 사람은 "변경사항" / "변경기록". 내부 동작은 동일
 - **LLM 세션 컨텍스트 기반** — 커밋 메시지가 아닌, 대화 중 실제로 한 작업을 바탕으로 CHANGELOG 작성
 - **프로젝트 자동 감지** — 설정 파일 없이 버전 파일, 릴리스 스크립트, CHANGELOG, 문서 디렉터리를 자동 탐지
-- **빈 릴리스 방지 게이트** — 릴리스 인프라가 전혀 없는 프로젝트는 자동 진행 대신 사용자 확인을 요구 (의도치 않은 GitHub 빈 릴리스 방지)
+- **원격 없으면 push 자동 스킵** — 로컬 커밋·태그만. GitHub 빈 릴리스 사고 방지
+- **빈 릴리스 방지 게이트** — 릴리스 인프라가 전혀 없는 프로젝트는 자동 진행 대신 사용자 확인을 요구
 - **이중 커밋 방지** — 기존 릴리스 스크립트가 있으면 읽고 중복 동작 제거
 - **토큰 절약** — 기계적 작업은 스크립트가 처리, LLM은 CHANGELOG 텍스트 생성만
 
@@ -31,7 +33,7 @@ echo ".release-docs/" >> .gitignore  # 또는 서브모듈로 관리
   "hooks": {
     "UserPromptSubmit": [
       {
-        "matcher": "릴리스|release|Release",
+        "matcher": "릴리스|변경사항|변경기록|release|Release|changelog|Changelog",
         "hooks": [
           {
             "type": "command",
@@ -53,7 +55,7 @@ ln -s ../../.release-docs/skills/release-docs .claude/skills/release-docs
 ```
 
 설치 직후부터 동작:
-- **UserPromptSubmit 훅** — "릴리스" 키워드 감지 시 `detect.sh` 자동 실행
+- **UserPromptSubmit 훅** — 트리거 키워드(`릴리스` / `변경사항` / `변경기록` / `release` / `changelog`) 감지 시 `detect.sh` 자동 실행
 - **release-docs 스킬** — LLM이 세션 컨텍스트에서 CHANGELOG 생성 후 스크립트 호출
 
 ### Codex (OpenAI)
@@ -91,15 +93,27 @@ Gemini가 `GEMINI.md`를 자동으로 읽고 스크립트를 참조합니다.
 
 ## 사용
 
+배포까지 할 것이면:
 ```
 릴리스해줘
 ```
 
-자동으로:
+배포 없이 로컬에 변경 기록만 남길 것이면:
+```
+변경사항 기록해줘
+```
+또는
+```
+변경기록
+```
+
+어느 쪽이든 자동으로:
 1. `detect.sh` — 프로젝트 구조 감지 (훅이 자동 실행)
 2. LLM — 세션 컨텍스트에서 변경 분류 + 버전 결정 + CHANGELOG 텍스트 생성
 3. `changelog-insert.sh` — CHANGELOG에 항목 삽입 (없으면 생성)
-4. `release.sh` — 버전 범프 + 빌드 + 커밋 + 태그 + 푸시 (버전 파일 없으면 `VERSION` 자동 생성)
+4. `release.sh` — 버전 범프 + 빌드 + 커밋 + 태그 + (원격 있을 때만) 푸시
+   - **원격 저장소가 없으면 push는 자동 스킵** — 로컬 커밋·태그만 남음 → GitHub 빈 릴리스 사고 없음
+   - 버전 파일 없으면 `VERSION` 자동 생성
 
 ## 릴리스 준비도 게이트
 

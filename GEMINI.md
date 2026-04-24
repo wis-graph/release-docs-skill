@@ -1,9 +1,15 @@
 # Release Docs — Gemini Instructions
 
 ## Skill: release-docs
-**Trigger:** "릴리스해줘", "release", version-bump request
+**Triggers:** "릴리스해줘" / "변경사항" / "변경기록" / "release" / "changelog" / version-bump or change-record request
 
-This plugin provides scripts for automated releases. Your job is to generate CHANGELOG text from session context — scripts handle everything else.
+This plugin provides scripts for automated CHANGELOG + version recording (with optional release to remote). Your job is to generate CHANGELOG text from session context — scripts handle everything else.
+
+**Modes:**
+- `릴리스` / `release` → full release (commit + tag + push if remote exists)
+- `변경사항` / `변경기록` / `changelog` → local-only changelog + version tag (push skipped automatically if no remote)
+
+The internal pipeline is identical. Only the wording of your final report changes.
 
 ### Available Scripts
 | Script | Purpose | Usage |

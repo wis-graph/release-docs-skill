@@ -1,7 +1,7 @@
 {
   "name": "release-docs",
-  "version": "0.1.0",
-  "description": "LLM 세션 컨텍스트 기반 릴리스 자동화 — CHANGELOG 작성, 버전 범프, 기능 문서 업데이트, 릴리스 실행을 한 번에. 스크립트 없는 프로젝트에서도 동작.",
+  "version": "0.2.0",
+  "description": "LLM 세션 컨텍스트 기반 CHANGELOG·버전·릴리스 자동화. 트리거 두 가족 지원: '릴리스/release'는 배포 모드, '변경사항/변경기록/changelog'는 로컬 기록 전용. 동일 파이프라인, 원격 없으면 push 자동 스킵.",
   "author": {
     "name": "wis",
     "email": "kogoome@gmail.com"
