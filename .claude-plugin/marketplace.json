@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "LLM 세션 컨텍스트 기반 릴리스 자동화 — 스크립트 없는 프로젝트에서도 CHANGELOG + 버전 + 문서 + 릴리스를 한 번에.",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "release-docs",
       "source": "./",
       "description": "릴리스해줘 한 마디로 — CHANGELOG 작성(세션 컨텍스트 기반), 버전 범프, 기능 문서 업데이트, 빌드+커밋+태그+푸시 자동화.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "release",
       "tags": ["release", "changelog", "versioning", "documentation"]
     }
